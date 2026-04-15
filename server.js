@@ -36,9 +36,8 @@ app.use(cors({
   credentials: true // Required if you decide to use cookies/sessions later
 }));
 
-// ✅ 2. EXPLICIT OPTIONS HANDLING
-// This ensures that the 'preflight' check always returns a 200 OK before the actual request.
-app.options("*", cors());
+// ✅ 2. EXPLICIT OPTIONS HANDLING - FIXED WILDCARD
+app.options("/*", cors());  // ← Changed from "*" to "/*"
 
 app.use(express.json());
 app.use(morgan("dev"));
