@@ -15,16 +15,15 @@ connectDB();
 
 const app = express();
 
-// ✅ 1. IMPROVED CORS CONFIGURATION
+// ✅ CORS CONFIGURATION
 const allowedOrigins = [
   "https://job-tracker-front-zeta.vercel.app", 
-  "http://localhost:5173", // Keep local dev working
+  "http://localhost:5173",
   "http://localhost:3000"
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
     if (allowedOrigins.indexOf(origin) === -1) {
       return callback(new Error("CORS policy blocked this origin"), false);
@@ -33,11 +32,11 @@ app.use(cors({
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true // Required if you decide to use cookies/sessions later
+  credentials: true
 }));
 
-// ✅ 2. EXPLICIT OPTIONS HANDLING - FIXED WILDCARD
-app.options("/*", cors());  // ← Changed from "*" to "/*"
+// ❌ REMOVE THIS LINE - it's causing the error
+// app.options("/*", cors());
 
 app.use(express.json());
 app.use(morgan("dev"));
@@ -46,22 +45,20 @@ app.get("/", (req, res) => {
   res.json({ message: "API is running..." });
 });
 
-// ✅ 3. API ROUTES
+// API ROUTES
 app.use("/api/auth", authRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/notifications", notificationRoutes);
 
-// ❌ 404 Handler
+// 404 Handler
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-// ❌ Global Error Handler
+// Global Error Handler
 app.use((err, req, res, next) => {
-  // Ensure CORS headers are sent even on errors
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*"); 
-  
+  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
   console.error("🔥 ERROR:", err);
   res.status(err.status || 500).json({
     message: err.message || "Server error",
